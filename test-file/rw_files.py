@@ -1,9 +1,13 @@
-# 读写文件测试，包括log/txt/json/html/csv/excel/word等文件类型
+# 读写文件测试，包括log/txt/json/xml/csv/excel/word等文件类型
 import csv
 import json
 import os
 import random
 import xml.etree.cElementTree as ET
+
+import win32com
+import win32com.client
+from openpyxl import Workbook, load_workbook
 
 
 def check_path(file_path):
@@ -60,7 +64,6 @@ def test_operate_xml(file_path, file_type):
                 '\t<packaging>pom</packaging>\n' \
                 '</project>'
         fw.writelines(lines)
-        pass
     # 读取操作：
     root = ET.parse(file_path).getroot()
     print(f'output {file_type} root ....... {root}')
@@ -68,11 +71,86 @@ def test_operate_xml(file_path, file_type):
         print(f'output {file_type} parent_child ....... parent-tag：{parent_child.tag}, parent-text：{parent_child.text}')
 
 
+def test_operate_excel(file_path, file_type):
+    check_path(file_path)
+    # 写入Excel操作：
+    print(f"开始写入Excel ....... {file_path}")
+    wb = Workbook()  # 打开工作簿
+    sheet = wb.active  # 激活sheet
+    t_headers = ['学号', '姓名', '专业', '班级', '住宿地址']  # 表头
+    for i in range(len(t_headers)):
+        sheet.cell(row=1, column=i + 1).value = t_headers[i]
+    t_bodys = [
+        ['1001', '王同学', '电子信息工程', '1班', '28-429'],
+        ['1002', '周同学', '历史系', '1班', '1-101'],
+        ['1003', '张同学', '艺术系', '1班', '5-205']
+    ]
+    for j in range(len(t_bodys)):
+        sheet.append(t_bodys[j])
+    # 保存Excel文件
+    wb.save(file_path)
+    wb.close()
+    print(f"结束写入Excel ....... {file_path}")
+
+    # 读取Excel操作：
+    print(f"开始读取Excel ....... {file_path}")
+    lw = load_workbook(file_path)
+    sheet_names = lw.sheetnames
+    print(f"Excel sheet_names ....... {str(sheet_names)}")
+    # 遍历sheet
+    for sheet_name in sheet_names:
+        current_sheet = lw[sheet_name]
+        print(f"Excel current_sheet ....... "
+              f"title: {current_sheet.title}, max_row: {current_sheet.max_row}, max_column: {current_sheet.max_column}")
+        # 按行读取,不包含表头
+        line_list = []
+        for line in range(2, current_sheet.max_row + 1):
+            for col in range(1, current_sheet.max_column + 1):
+                line_list.append(current_sheet.cell(row=line, column=col).value)
+        print(f"Excel sheet_name ....... {str(sheet_names)}, result: {str(line_list)}")
+    print(f"结束读取Excel ....... {file_path}")
+
+
+def test_operate_word(file_path, file_type):
+    check_path(file_path)
+    # 写入word操作：
+    print(f"开始写入word ....... {file_path}")
+    w_app = win32com.client.Dispatch('Word.Application')  # 打开office
+    w_app.Visible = True  # 设置可见
+    # 创建文档
+    doc = w_app.Documents.Add()
+    start = doc.Range(0, 0)  # 文本开始位置
+    start.InsertBefore('Hello Word\n')
+    start.InsertAfter('我是weixiangxiang\n')
+    start.InsertAfter('我在测试数据写入Word文档操作\n')
+    end = doc.Range()  # 文本结束位置
+    end.InsertAfter('updatetime: 20240606')
+    # 第二个参数，不写默认docx，传2则为txt（转储到txt）
+    doc.SaveAs(file_path)
+    # 关闭，True-保存内容，False则不保存
+    doc.Close(True)
+    w_app.Quit()
+    print(f"结束写入word ....... {file_path}")
+
+    # 读取word操作：
+    print(f"开始读取word ....... {file_path}")
+    r_app = win32com.client.Dispatch('Word.Application')
+    word = r_app.Documents.Open(file_path)
+    for w in word.Paragraphs:
+        print(f'output {file_type} line text ....... {w.Range.Text}')
+    # 关闭
+    word.Close()
+    r_app.Quit()
+    print(f"结束读取word ....... {file_path}")
+
+
 if __name__ == '__main__':
     base_path = 'D:\\My Test\\XXX\\'
-    type_list = ['log', 'txt', 'json', 'csv', 'xml']
+    type_list = ['log', 'txt', 'json', 'csv', 'xml', 'xlsx', 'docx']
     test_operate_log(base_path + "test1.log", type_list[0])
     test_operate_log(base_path + "test2.txt", type_list[1])
     test_operate_json2(base_path + "test3.json", type_list[2])
     test_operate_csv(base_path + "test4.csv", type_list[3])
     test_operate_xml(base_path + "test5.xml", type_list[4])
+    test_operate_excel(base_path + "test6.xlsx", type_list[5])
+    test_operate_word(base_path + "test7.docx", type_list[6])
