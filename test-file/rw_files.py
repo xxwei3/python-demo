@@ -11,10 +11,10 @@ from openpyxl import Workbook, load_workbook
 
 
 def check_path(file_path):
+    """检查目标文件是否存在，不存在新建"""
     if not os.path.exists(file_path):
         with open(file_path, 'x', encoding='utf-8'):
             print(f'file path not exists, create new file ----> {file_path}')
-            pass
 
 
 def test_operate_log(file_path, file_type):
@@ -91,7 +91,6 @@ def test_operate_excel(file_path, file_type):
     wb.save(file_path)
     wb.close()
     print(f"结束写入Excel ....... {file_path}")
-
     # 读取Excel操作：
     print(f"开始读取Excel ....... {file_path}")
     lw = load_workbook(file_path)
@@ -131,7 +130,6 @@ def test_operate_word(file_path, file_type):
     doc.Close(True)
     w_app.Quit()
     print(f"结束写入word ....... {file_path}")
-
     # 读取word操作：
     print(f"开始读取word ....... {file_path}")
     r_app = win32com.client.Dispatch('Word.Application')
@@ -145,7 +143,7 @@ def test_operate_word(file_path, file_type):
 
 
 if __name__ == '__main__':
-    base_path = 'D:\\My Test\\XXX\\'
+    base_path = 'D:\\My Test\\XXX\\test-file\\'
     type_list = ['log', 'txt', 'json', 'csv', 'xml', 'xlsx', 'docx']
     test_operate_log(base_path + "test1.log", type_list[0])
     test_operate_log(base_path + "test2.txt", type_list[1])
