@@ -1,7 +1,6 @@
 # 读写文件测试，包括log/txt/json/xml/csv/excel/word等文件类型
 import csv
 import json
-import os
 import random
 import xml.etree.cElementTree as ET
 
@@ -9,16 +8,11 @@ import win32com
 import win32com.client
 from openpyxl import Workbook, load_workbook
 
-
-def check_path(file_path):
-    """检查目标文件是否存在，不存在新建"""
-    if not os.path.exists(file_path):
-        with open(file_path, 'x', encoding='utf-8'):
-            print(f'file path not exists, create new file ----> {file_path}')
+import tools.verify as verify
 
 
 def test_operate_log(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     with open(file_path, 'a+', encoding='utf-8') as fw:
         random_num = random.randint(1, 1000)
         fw.writelines(str(random_num))
@@ -28,7 +22,7 @@ def test_operate_log(file_path, file_type):
 
 
 def test_operate_json2(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     dicts = {'a': True, 'b': 3.1415, 'c': "testing"}
     # 写入json文件
     with open(file_path, 'w', encoding='utf-8') as f:
@@ -40,7 +34,7 @@ def test_operate_json2(file_path, file_type):
 
 
 def test_operate_csv(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     # 按行写入csv文件, 每个列表是一行
     content = [[1, 2, 3, 4, 5, 6, 7, 8, 9],
                ["china", "china", "china", "china", "china", "china", "china", "china"],
@@ -56,7 +50,7 @@ def test_operate_csv(file_path, file_type):
 
 
 def test_operate_xml(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     # 写入操作：
     with open(file_path, 'w', encoding='utf-8') as fw:
         lines = '<project>\n' \
@@ -72,7 +66,7 @@ def test_operate_xml(file_path, file_type):
 
 
 def test_operate_excel(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     # 写入Excel操作：
     print(f"开始写入Excel ....... {file_path}")
     wb = Workbook()  # 打开工作簿
@@ -111,7 +105,7 @@ def test_operate_excel(file_path, file_type):
 
 
 def test_operate_word(file_path, file_type):
-    check_path(file_path)
+    verify.verify_file_path(file_path)
     # 写入word操作：
     print(f"开始写入word ....... {file_path}")
     w_app = win32com.client.Dispatch('Word.Application')  # 打开office
